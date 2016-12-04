@@ -128,14 +128,27 @@ public class Speedometer extends View {
             for (int num = 0; num<360; num+=45) {
                 double radNum = toRadians(num) + PI / 2;
                 String numString = String.valueOf(num);
+
+                float xOnCircle = (float)(centerX+radius*cos(radNum));
+                float yOnCircle = (float)(centerY+radius*sin(radNum));
+
+                canvas.drawLine(xOnCircle, yOnCircle,
+                        (float)(xOnCircle-50*cos(radNum)), (float)(yOnCircle-50*sin(radNum)),
+                        paint);
+
                 float numWidth = mTextPaint.measureText(numString);
-                float numHeight = mTextPaint.measureText(numString);
+                Paint.FontMetrics numFontMetrics = mTextPaint.getFontMetrics();
+                float numHeight = mTextHeight = numFontMetrics.bottom;
                 canvas.drawText(numString,
-                        centerX + (float) ((radius - numWidth/2) * cos(radNum) - (numWidth
-                                / 2)),
-                        centerY + (float) ((radius - (numHeight)) * sin(radNum)),// + (numHeight*abs(cos(radNum))/2)),
-//                        centerY + (float) ((radius + mTextHeight/2) * sin(radNum)) + (mTextHeight/2),
+                        xOnCircle - (float)(numWidth*cos(radNum) + numWidth/2),
+                        yOnCircle + (float)(numHeight*sin(radNum)/2 - (numHeight*cos(radNum)/2)),
                         mTextPaint);
+//                canvas.drawText(numString,
+//                        centerX + (float) ((radius - numWidth/2) * cos(radNum) - (numWidth
+//                                / 2)),
+//                        centerY + (float) ((radius - (numHeight)) * sin(radNum)),// + (numHeight*abs(cos(radNum))/2)),
+////                        centerY + (float) ((radius + mTextHeight/2) * sin(radNum)) + (mTextHeight/2),
+//                        mTextPaint);
             }
 
         // Draw the text.
@@ -145,10 +158,6 @@ public class Speedometer extends View {
                 mTextPaint);
 
         canvas.drawLine(centerX, centerY, (float)(centerX+radius*cos(angle)), (float)(centerY+radius*sin(angle)), paint);
-        paint.setColor(Color.RED);
-        canvas.drawLine(centerX, centerY+radius, centerX, centerY - radius, paint);
-        canvas.drawLine(centerX - radius, centerY, centerX + radius, centerY, paint);
-        paint.setColor(mExampleColor);
     }
 
     public void accelerate(){
