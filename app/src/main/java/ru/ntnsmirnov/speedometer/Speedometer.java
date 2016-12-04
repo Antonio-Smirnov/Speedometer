@@ -13,15 +13,19 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.BounceInterpolator;
 
+import static android.R.attr.centerX;
 import static android.R.attr.centerY;
 import static java.lang.Math.PI;
+import static java.lang.Math.abs;
 import static java.lang.Math.cos;
+import static java.lang.Math.floor;
 import static java.lang.Math.sin;
 import static java.lang.Math.toRadians;
 
 public class Speedometer extends View {
     private int mExampleColor = Color.RED;
     private float mExampleDimension = 40;
+    private float strokeWidth = 6f;
 
     private TextPaint mTextPaint;
     private float mTextWidth;
@@ -31,6 +35,22 @@ public class Speedometer extends View {
 
     double angle = PI / 2;
     String speed = "0";
+
+
+    int paddingLeft = 0;
+    int paddingTop = 0;
+    int paddingRight = 0;
+    int paddingBottom = 0;
+
+    int width = 0;
+    int height = 0;
+
+    int contentWidth = 0;
+    int contentHeight = 0;
+
+    float centerX = 0;
+    float centerY = 0;
+    float radius = 0;
 
     public Speedometer(Context context) {
         super(context);
@@ -66,7 +86,7 @@ public class Speedometer extends View {
 
         paint = new Paint();
         paint.setAntiAlias(true);
-        paint.setStrokeWidth(6f);
+        paint.setStrokeWidth(strokeWidth);
         paint.setColor(mExampleColor);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
@@ -87,38 +107,58 @@ public class Speedometer extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        int paddingLeft = getPaddingLeft();
-        int paddingTop = getPaddingTop();
-        int paddingRight = getPaddingRight();
-        int paddingBottom = getPaddingBottom();
+        this.paddingLeft = getPaddingLeft();
+        this.paddingTop = getPaddingTop();
+        this.paddingRight = getPaddingRight();
+        this.paddingBottom = getPaddingBottom();
+        this.width = getWidth();
+        this.height = getHeight();
 
-        int contentWidth = getWidth() - paddingLeft - paddingRight - 12;
-        int contentHeight = getHeight() - paddingTop - paddingBottom - 12;
+            int contentWidth = width - paddingLeft - paddingRight - (int)(strokeWidth * 2);
+            int contentHeight = height - paddingTop - paddingBottom - (int)(strokeWidth * 2);
 
-        float centerX = paddingLeft + contentWidth / 2 + 6;
-        float centerY = paddingTop + contentHeight / 2 + 6;
-        float radius = Math.min(contentHeight, contentWidth)/2;
+            float centerX = paddingLeft + contentWidth / 2 + strokeWidth;
+            float centerY = paddingTop + contentHeight / 2 + strokeWidth;
+            float radius = Math.min(contentHeight, contentWidth) / 2;
 
 
-        canvas.drawCircle(centerX,
-                centerY, radius, paint);
+            canvas.drawCircle(centerX,
+                    centerY, radius, paint);
+
+            for (int num = 0; num<360; num+=45) {
+                double radNum = toRadians(num) + PI / 2;
+                String numString = String.valueOf(num);
+                float numWidth = mTextPaint.measureText(numString);
+                float numHeight = mTextPaint.measureText(numString);
+                canvas.drawText(numString,
+                        centerX + (float) ((radius - numWidth/2) * cos(radNum) - (numWidth
+                                / 2)),
+                        centerY + (float) ((radius - (numHeight)) * sin(radNum)),// + (numHeight*abs(cos(radNum))/2)),
+//                        centerY + (float) ((radius + mTextHeight/2) * sin(radNum)) + (mTextHeight/2),
+                        mTextPaint);
+            }
 
         // Draw the text.
         canvas.drawText(speed,
                 paddingLeft + (contentWidth - mTextWidth) / 2,
-                paddingTop + (contentHeight + mTextHeight) / 2 - 50,
+                paddingTop + (contentHeight + mTextHeight) / 2 - mTextHeight,
                 mTextPaint);
+
         canvas.drawLine(centerX, centerY, (float)(centerX+radius*cos(angle)), (float)(centerY+radius*sin(angle)), paint);
+        paint.setColor(Color.RED);
+        canvas.drawLine(centerX, centerY+radius, centerX, centerY - radius, paint);
+        canvas.drawLine(centerX - radius, centerY, centerX + radius, centerY, paint);
+        paint.setColor(mExampleColor);
     }
 
     public void accelerate(){
-        ValueAnimator animator = ValueAnimator.ofInt(0, 90, 70, 180, 160, 270, 250, 360);
+        ValueAnimator animator = ValueAnimator.ofInt(0, 90, 70, 180, 160, 270, 250, 360, 0);
         animator.setDuration(5000);
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                int value = ((Integer) (animation.getAnimatedValue())).intValue();
+                int value = (Integer) (animation.getAnimatedValue());
                 speed = String.valueOf(value);
                 angle = toRadians(value)+ PI / 2;
                 invalidate();
