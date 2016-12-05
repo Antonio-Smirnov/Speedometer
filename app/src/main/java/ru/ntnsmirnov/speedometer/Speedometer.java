@@ -143,12 +143,6 @@ public class Speedometer extends View {
                         xOnCircle - (float)(numWidth*cos(radNum) + numWidth/2),
                         yOnCircle + (float)(numHeight*sin(radNum)/2 - (numHeight*cos(radNum)/2)),
                         mTextPaint);
-//                canvas.drawText(numString,
-//                        centerX + (float) ((radius - numWidth/2) * cos(radNum) - (numWidth
-//                                / 2)),
-//                        centerY + (float) ((radius - (numHeight)) * sin(radNum)),// + (numHeight*abs(cos(radNum))/2)),
-////                        centerY + (float) ((radius + mTextHeight/2) * sin(radNum)) + (mTextHeight/2),
-//                        mTextPaint);
             }
 
         // Draw the text.
