@@ -10,6 +10,6 @@
         android:paddingBottom="40dp"
         android:paddingLeft="20dp"
         app:exampleColor="#33b5e5"
-        app:exampleDimension="24sp" />
+        app:exampleDimension="12sp" />
 
 </FrameLayout>

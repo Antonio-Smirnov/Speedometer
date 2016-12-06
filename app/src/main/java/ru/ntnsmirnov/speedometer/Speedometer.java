@@ -1,28 +1,27 @@
 package ru.ntnsmirnov.speedometer;
 
+
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.BounceInterpolator;
 
-import static android.R.attr.centerX;
-import static android.R.attr.centerY;
 import static java.lang.Math.PI;
-import static java.lang.Math.abs;
 import static java.lang.Math.cos;
-import static java.lang.Math.floor;
 import static java.lang.Math.sin;
 import static java.lang.Math.toRadians;
 
 public class Speedometer extends View {
+
+    public static final int SEGMENT_LINE_OFFSET = 50;
+    public static final int SEGMENT_NUMBER_OFFSET = SEGMENT_LINE_OFFSET + 25;
+
     private int mExampleColor = Color.RED;
     private float mExampleDimension = 40;
     private float strokeWidth = 6f;
@@ -33,7 +32,7 @@ public class Speedometer extends View {
 
     private Paint paint;
 
-    double angle = PI / 2;
+    double angle = 0.75*PI;
     String speed = "0";
 
 
@@ -91,16 +90,12 @@ public class Speedometer extends View {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
 
-        invalidateTextPaintAndMeasurements();
+        invalidateTextPaint();
     }
 
-    private void invalidateTextPaintAndMeasurements() {
+    private void invalidateTextPaint() {
         mTextPaint.setTextSize(mExampleDimension);
         mTextPaint.setColor(mExampleColor);
-        mTextWidth = mTextPaint.measureText(String.valueOf(speed));
-
-        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
-        mTextHeight = fontMetrics.bottom;
     }
 
     @Override
@@ -114,48 +109,69 @@ public class Speedometer extends View {
         this.width = getWidth();
         this.height = getHeight();
 
-            int contentWidth = width - paddingLeft - paddingRight - (int)(strokeWidth * 2);
-            int contentHeight = height - paddingTop - paddingBottom - (int)(strokeWidth * 2);
+        contentWidth = width - paddingLeft - paddingRight - (int) (strokeWidth * 2);
+        contentHeight = height - paddingTop - paddingBottom - (int) (strokeWidth * 2);
 
-            float centerX = paddingLeft + contentWidth / 2 + strokeWidth;
-            float centerY = paddingTop + contentHeight / 2 + strokeWidth;
-            float radius = Math.min(contentHeight, contentWidth) / 2;
+        centerX = paddingLeft + contentWidth / 2 + strokeWidth;
+        centerY = paddingTop + contentHeight / 2 + strokeWidth;
+        radius = Math.min(contentHeight, contentWidth) / 2;
 
 
-            canvas.drawCircle(centerX,
-                    centerY, radius, paint);
+        canvas.drawCircle(centerX,
+                centerY, radius, paint);
 
-            for (int num = 0; num<360; num+=45) {
-                double radNum = toRadians(num) + PI / 2;
-                String numString = String.valueOf(num);
+        for (int num = 0; num <= 270; num += 45) {
+            double radNum = toRadians(num+45) + PI / 2;
+            String numString = String.valueOf(num);
 
-                float xOnCircle = (float)(centerX+radius*cos(radNum));
-                float yOnCircle = (float)(centerY+radius*sin(radNum));
+            float cosR = (float) cos(radNum);
+            float sinR = (float) sin(radNum);
 
-                canvas.drawLine(xOnCircle, yOnCircle,
-                        (float)(xOnCircle-50*cos(radNum)), (float)(yOnCircle-50*sin(radNum)),
-                        paint);
+            float xOnCircle = centerX + radius * cosR;
+            float yOnCircle = centerY + radius * sinR;
 
-                float numWidth = mTextPaint.measureText(numString);
-                Paint.FontMetrics numFontMetrics = mTextPaint.getFontMetrics();
-                float numHeight = mTextHeight = numFontMetrics.bottom;
-                canvas.drawText(numString,
-                        xOnCircle - (float)(numWidth*cos(radNum) + numWidth/2),
-                        yOnCircle + (float)(numHeight*sin(radNum)/2 - (numHeight*cos(radNum)/2)),
-                        mTextPaint);
-            }
+            canvas.drawLine(
+                    xOnCircle,
+                    yOnCircle,
+                    xOnCircle - SEGMENT_LINE_OFFSET * cosR,
+                    yOnCircle - SEGMENT_LINE_OFFSET * sinR,
+                    paint);
 
-        // Draw the text.
+            float numWidth = mTextPaint.measureText(numString);
+            Paint.FontMetrics numFontMetrics = mTextPaint.getFontMetrics();
+            float numHeight = mTextHeight = numFontMetrics.bottom;
+
+            canvas.drawText(
+                    numString,
+                    xOnCircle - SEGMENT_NUMBER_OFFSET * cosR - numWidth / 2 - (numWidth / 2) * cosR,
+                    yOnCircle - SEGMENT_NUMBER_OFFSET * sinR + numHeight / 2 - (numHeight / 2) * sinR,
+                    mTextPaint);
+        }
+
+        mTextWidth = mTextPaint.measureText(String.valueOf(speed));
+        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
+        mTextHeight = fontMetrics.bottom;
+
         canvas.drawText(speed,
                 paddingLeft + (contentWidth - mTextWidth) / 2,
-                paddingTop + (contentHeight + mTextHeight) / 2 - mTextHeight,
+                paddingTop + 0.75f*contentHeight - mTextHeight,
                 mTextPaint);
 
-        canvas.drawLine(centerX, centerY, (float)(centerX+radius*cos(angle)), (float)(centerY+radius*sin(angle)), paint);
+        canvas.drawLine(
+                centerX,
+                centerY,
+                (float) (centerX + radius * cos(angle)),
+                (float) (centerY + radius * sin(angle)),
+                paint);
     }
 
-    public void accelerate(){
-        ValueAnimator animator = ValueAnimator.ofInt(0, 90, 70, 180, 160, 270, 250, 360, 0);
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    public void accelerate() {
+        ValueAnimator animator = ValueAnimator.ofInt(0, 90, 70, 180, 160, 270, 0);
         animator.setDuration(5000);
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -163,26 +179,29 @@ public class Speedometer extends View {
             public void onAnimationUpdate(ValueAnimator animation) {
                 int value = (Integer) (animation.getAnimatedValue());
                 speed = String.valueOf(value);
-                angle = toRadians(value)+ PI / 2;
+                angle = toRadians(value+45) + PI / 2;
                 invalidate();
             }
         });
+        animator.setRepeatCount(ValueAnimator.INFINITE);
         animator.start();
     }
 
     public int getExampleColor() {
         return mExampleColor;
     }
+
     public void setExampleColor(int exampleColor) {
         mExampleColor = exampleColor;
-        invalidateTextPaintAndMeasurements();
+        invalidateTextPaint();
     }
 
     public float getExampleDimension() {
         return mExampleDimension;
     }
+
     public void setExampleDimension(float exampleDimension) {
         mExampleDimension = exampleDimension;
-        invalidateTextPaintAndMeasurements();
+        invalidateTextPaint();
     }
 }
