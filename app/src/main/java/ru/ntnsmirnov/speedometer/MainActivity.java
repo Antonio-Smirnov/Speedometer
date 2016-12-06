@@ -12,11 +12,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final Speedometer speedometer = (Speedometer)findViewById(R.id.speedometer);
-        speedometer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                speedometer.accelerate();
-            }
-        });
+        speedometer.accelerate();
     }
 }

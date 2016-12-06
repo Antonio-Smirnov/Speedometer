@@ -16,5 +16,6 @@
         android:layout_height="match_parent"
         app:exampleColor="#33b5e5"
         app:exampleDimension="20sp"
-        android:id="@+id/speedometer"/>
+        android:id="@+id/speedometer"
+        android:keepScreenOn="true"/>
 </RelativeLayout>
