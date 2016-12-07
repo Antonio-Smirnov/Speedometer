@@ -102,21 +102,6 @@ public class Speedometer extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        this.paddingLeft = getPaddingLeft();
-        this.paddingTop = getPaddingTop();
-        this.paddingRight = getPaddingRight();
-        this.paddingBottom = getPaddingBottom();
-        this.width = getWidth();
-        this.height = getHeight();
-
-        contentWidth = width - paddingLeft - paddingRight - (int) (strokeWidth * 2);
-        contentHeight = height - paddingTop - paddingBottom - (int) (strokeWidth * 2);
-
-        centerX = paddingLeft + contentWidth / 2 + strokeWidth;
-        centerY = paddingTop + contentHeight / 2 + strokeWidth;
-        radius = Math.min(contentHeight, contentWidth) / 2;
-
-
         canvas.drawCircle(centerX,
                 centerY, radius, paint);
 
@@ -166,8 +151,22 @@ public class Speedometer extends View {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        this.paddingLeft = getPaddingLeft();
+        this.paddingTop = getPaddingTop();
+        this.paddingRight = getPaddingRight();
+        this.paddingBottom = getPaddingBottom();
+        this.width = getWidth();
+        this.height = getHeight();
+
+        contentWidth = width - paddingLeft - paddingRight - (int) (strokeWidth * 2);
+        contentHeight = height - paddingTop - paddingBottom - (int) (strokeWidth * 2);
+
+        centerX = paddingLeft + contentWidth / 2 + strokeWidth;
+        centerY = paddingTop + contentHeight / 2 + strokeWidth;
+        radius = Math.min(contentHeight, contentWidth) / 2;
     }
 
     public void accelerate() {
